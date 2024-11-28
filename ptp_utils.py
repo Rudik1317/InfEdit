@@ -16,6 +16,7 @@ import numpy as np
 import torch
 from typing import Optional, Union, Tuple, Dict
 from PIL import Image
+import pdb
 
 def save_images(images,dest, num_rows=1, offset_ratio=0.02):
     if type(images) is list:
@@ -89,8 +90,11 @@ def register_attention_control(model, controller):
             hidden_states = torch.bmm(attention_probs, v)
             hidden_states = attn.batch_to_head_dim(hidden_states)
 
-            # linear proj   
-            hidden_states = attn.to_out[0](hidden_states, scale=scale)
+            # linear proj
+            # print(type(attn))  # <class 'diffusers.models.attention_processor.Attention'>                                                                   
+            # print(type(attn.to_out[0]))  # <class 'torch.nn.modules.linear.Linear'> 
+            # pdb.set_trace()
+            hidden_states = attn.to_out[0](hidden_states) * scale
             # dropout
             hidden_states = attn.to_out[1](hidden_states)
 

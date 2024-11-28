@@ -13,6 +13,11 @@ import numpy as np
 import seq_aligner
 import math
 
+# remove warning depricated? maybe later rewrite code
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="diffusers.configuration_utils")
+warnings.filterwarnings("ignore", category=FutureWarning, module="diffusers.")
+
 LOW_RESOURCE = False
 MAX_NUM_WORDS = 77
 
@@ -26,9 +31,11 @@ device_print = "GPU 🔥" if torch.cuda.is_available() else "CPU 🥶"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 if is_colab:
+    print("is_colab")
     scheduler = LCMScheduler.from_config(model_id_or_path, subfolder="scheduler")
     pipe = EditPipeline.from_pretrained(model_id_or_path, scheduler=scheduler, torch_dtype=torch_dtype)
 else:
+    print("else is_colab")
     scheduler = LCMScheduler.from_config(model_id_or_path, use_auth_token=os.environ.get("USER_TOKEN"), subfolder="scheduler")
     pipe = EditPipeline.from_pretrained(model_id_or_path, use_auth_token=os.environ.get("USER_TOKEN"), scheduler=scheduler, torch_dtype=torch_dtype)
 
@@ -36,6 +43,7 @@ tokenizer = pipe.tokenizer
 encoder = pipe.text_encoder
 
 if torch.cuda.is_available():
+    print("Move pipe to cuda")
     pipe = pipe.to("cuda")
 
 
@@ -594,5 +602,5 @@ with gr.Blocks(css=css) as demo:
           cross_replace_steps, self_replace_steps, 
           thresh_e, thresh_m, denoise],
         image_out, inference, examples_per_page=20)
-demo.launch(debug=False, share=False)
+demo.launch(debug=True, share=False)
 
