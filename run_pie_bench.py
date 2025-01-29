@@ -380,11 +380,27 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--source_path', type=str, required=True)
     parser.add_argument('--target_path', type=str, required=True)
+    #parser.add_argument('--target_path', type=str, default="experiments/results/pie_bench")
+    parser.add_argument('--edit_category_list',  nargs = '+', type=str, default=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
 
     args = parser.parse_args()
 
     root = args.source_path
     target = args.target_path
+    edit_category_list = args.edit_category_list
+
+    # model_params = {
+    #     structure = "ddcm+uac",
+    #     gdc_s=1, 
+    #     gdc_t=2.3, 
+    #     inf_stp=12,
+    #     cr_rpl_stp=0.7, 
+    #     slf_rpl_stp=0.7, 
+    #     eta=1,
+    #     thresh_e=0.55, 
+    #     thresh_m=0.6, 
+    #     denoise=False
+    # }
     
 
     annotation_file_name = os.path.join(root,"mapping_file.json")
@@ -392,6 +408,8 @@ def main():
         annotation_file = json.load(f)
     for annotation_idx , annotation  in annotation_file.items():
         print(annotation_idx)
+        if not(annotation["image_path"][0] in edit_category_list):
+            continue
         img_path =os.path.join(root, "annotation_images",annotation["image_path"] )
         # if os.path.exists( os.path.join(target, "annotation_images", annotation["image_path"])):
         #     continue
@@ -403,9 +421,29 @@ def main():
             local = annotation["blended_word"].split(" ")[1]
         else:
             local = ""
-        image_out = inference(source_prompt, target_prompt, "", "", local, "", 1, 2.3, num_inference_steps=12,
-                width=512, height=512, seed=0, img=imagein, strength=1,
-                cross_replace_steps=0.7, self_replace_steps=0.7, eta=1, thresh_e=0.55, thresh_m=0.6, denoise=False)
+        image_out = inference(
+            source_prompt=source_prompt, 
+            target_prompt=target_prompt, 
+            positive_prompt="", 
+            negative_prompt="", 
+            local=local, 
+            mutual="", 
+            guidance_s=1, 
+            guidance_t=2.3, 
+            num_inference_steps=12,
+            width=512, 
+            height=512, 
+            seed=0, 
+            img=imagein, 
+            strength=1,
+            cross_replace_steps=0.7, 
+            self_replace_steps=0.7, 
+            eta=1, 
+            thresh_e=0.55, 
+            thresh_m=0.6, 
+            denoise=False
+        )
+
         annotation_dir = os.path.dirname(annotation["image_path"])
 
         # Create the full directory path

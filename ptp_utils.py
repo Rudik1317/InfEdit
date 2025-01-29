@@ -95,6 +95,7 @@ def register_attention_control(model, controller):
             # print(type(attn.to_out[0]))  # <class 'torch.nn.modules.linear.Linear'> 
             # pdb.set_trace()
             hidden_states = attn.to_out[0](hidden_states) * scale
+            #hidden_states = attn.to_out[0](hidden_states, scale=scale)
             # dropout
             hidden_states = attn.to_out[1](hidden_states)
 

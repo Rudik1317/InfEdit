@@ -6,6 +6,18 @@ from PIL import Image
 import csv
 from evaluation.matrics_calculator import MetricsCalculator
 
+
+def take_edit_type_and_img_type(img_path_from_mapping_file:str):
+    s = img_path_from_mapping_file
+    edit_type = s[s.index("_")+1:s[:s.index("/")].rindex("_")]
+
+    if img_path_from_mapping_file[0] != "0":
+        s_new = s[s.index("/")+1:]
+        img_type = s_new[s_new.index("_")+1:s_new.index("/")]
+    else:
+        img_type = None
+    return [edit_type, img_type]
+
 def mask_decode(encoded_mask,image_shape=[512,512]):
     length=image_shape[0]*image_shape[1]
     mask_array=np.zeros((length,))
@@ -100,11 +112,13 @@ def calculate_metric(metrics_calculator,metric, src_image, tgt_image, src_mask, 
 all_tgt_image_folders={
     # results of comparing inversion
     "no_edit": "data/annotation_images",
-    "1_ddim+p2p":"output/ddim+p2p/annotation_images",
-    "1_null-text-inversion+p2p_a800":"output/null-text-inversion+p2p_a800/annotation_images",
-    "piy_bench_2411280347": "results/piy_bench_2411280347/annotation_images",
+    "infEdit_origin": "experiments/results/infEdit_pieBench_origin/annotation_images",
+    "piy_bench_2411280347": "experiments/results/piy_bench_2411280347/annotation_images",
+    "infEdit_base_part_of_inference": "experiments/results/infEdit_base_part_of_inference/annotation_images",
+    "origin_params_InfEdit": "experiments/results/pie_bench/origin_params_InfEdit/annotation_images", # myFirstConda ddim+UAC LCM_Dreamshaper_v7
+    "origin_params_InfEdit_2": "experiments/results/pie_bench/origin_params_InfEdit_2/annotation_images", # copy conda InfEdit, install req from github
+    "origin_params_InfEdit_2_revert_hidden_state": "experiments/results/pie_bench/origin_params_InfEdit_2_revert_hidden_state/annotation_images", # copy conda InfEdit, install req from github and revert code hidden state
 }
-
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
@@ -159,8 +173,9 @@ if __name__=="__main__":
     else:
         for key in tgt_methods:
             tgt_image_folders[key]=all_tgt_image_folders[key]
-    
-    result_path=args.result_path
+            
+    pre_result_path = "/home/mdnikolaev/darudenkov/InfEdit/experiments/evaluation_results"
+    result_path=f"{pre_result_path}/{args.result_path}"
     
     metrics_calculator=MetricsCalculator(args.device)
     
@@ -172,7 +187,7 @@ if __name__=="__main__":
             for metric in metrics:
                 csv_head.append(f"{tgt_image_folder_key}|{metric}")
         
-        data_row = ["file_id"]+csv_head
+        data_row = ["file_id", "edit_type", "img_type"]+csv_head
         csv_write.writerow(data_row)
 
     with open(annotation_mapping_file,"r") as f:
@@ -193,7 +208,7 @@ if __name__=="__main__":
         src_image = Image.open(src_image_path)
         
         
-        evaluation_result=[key]
+        evaluation_result=[key, *take_edit_type_and_img_type(item["image_path"])]
         
         for tgt_image_folder_key,tgt_image_folder in tgt_image_folders.items():
             tgt_image_path=os.path.join(tgt_image_folder, base_image_path)
