@@ -118,6 +118,8 @@ all_tgt_image_folders={
     "origin_params_InfEdit": "experiments/results/pie_bench/origin_params_InfEdit/annotation_images", # myFirstConda ddim+UAC LCM_Dreamshaper_v7
     "origin_params_InfEdit_2": "experiments/results/pie_bench/origin_params_InfEdit_2/annotation_images", # copy conda InfEdit, install req from github
     "origin_params_InfEdit_2_revert_hidden_state": "experiments/results/pie_bench/origin_params_InfEdit_2_revert_hidden_state/annotation_images", # copy conda InfEdit, install req from github and revert code hidden state
+    "origin_10steps": "experiments/results/pie_bench/origin_10steps/annotation_images",
+    "origin_15steps": "experiments/results/pie_bench/origin_15steps/annotation_images",
 }
 
 if __name__=="__main__":

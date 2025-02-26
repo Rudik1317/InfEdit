@@ -56,6 +56,17 @@ def create_prompt_image(text, size=(512, 512)):
     return img
 
 def plot_comparison(image_ids, experiment_names, base_folder="data", exp_folder="experiments/results/pie_bench", save_path="experiments/imgs_compare", save_name=None, title_fontsize=12):
+    """
+    строит график где колонки это названия експерименитов (первая колонка это базовое изображение, последняя промт)
+    строка принадлежит одной картинке
+    На вход 
+        адишники картинок которые нужно
+        базовая папка откуда забираем сорс и промты
+        папка где лежат папки експериментов с итоговыми картинками
+        путь куда сохраняем картинку итог
+        название картинки итог
+        размер текста
+    """
     mapping_path = os.path.join(base_folder, "mapping_file.json")
     with open(mapping_path, "r") as f:
         mapping = json.load(f)
@@ -70,7 +81,7 @@ def plot_comparison(image_ids, experiment_names, base_folder="data", exp_folder=
         axes = np.expand_dims(axes, axis=1)
     
     # Устанавливаем заголовки для первой строки
-    axes[0, 0].set_title("Target", fontsize=title_fontsize)
+    axes[0, 0].set_title("Source", fontsize=title_fontsize)
     for col_idx, exp_name in enumerate(experiment_names):
         axes[0, col_idx + 1].set_title(exp_name, fontsize=title_fontsize)
     axes[0, num_cols - 1].set_title("Prompts", fontsize=title_fontsize)
@@ -90,6 +101,9 @@ def plot_comparison(image_ids, experiment_names, base_folder="data", exp_folder=
         # Колонки экспериментов
         for col_idx, exp_name in enumerate(experiment_names):
             exp_image_path = os.path.join(exp_folder, exp_name, "annotation_images", image_path)
+            if not os.path.exists(exp_image_path):
+                print(f"Image not found: {exp_image_path}")
+                return
             exp_img = load_image(exp_image_path)
             axes[row_idx, col_idx + 1].imshow(exp_img)
             axes[row_idx, col_idx + 1].axis("off")
@@ -128,13 +142,132 @@ def sample_images_by_editing_type(mapping_file, num_samples_per_type, editing_ty
 
 
 
-experiment_names = [
-    "origin_params_InfEdit"
+#random_image_ids = sample_images_by_editing_type("data/mapping_file.json", num_samples_per_type=4, editing_types=None)
+#print(random_image_ids)
+#plot_comparison(title_image_ids, experiment_names, save_name="title_images.png")
+#['000000000010', '000000000104', '000000000007', '000000000034', '121000000002', '123000000008', '112000000005', '123000000004', '224000000003', '212000000003', '222000000007', '212000000002', '323000000006', '322000000005', '324000000007', '312000000000', '413000000003', '411000000000', '424000000002', '411000000004', '511000000003', '524000000004', '514000000003', '522000000003', '622000000004', '622000000000', '614000000000', '613000000004', '722000000003', '722000000001', '724000000004', '712000000000', '812000000000', '822000000006', '811000000000', '814000000009', '911000000002', '914000000000', '923000000005', '921000000009']
+#random_image_ids = ["random_images", '000000000101', '000000000054', '000000000020', '000000000009', '123000000007', '113000000007', '121000000000', '111000000000', '221000000001', '221000000007', '222000000002', '212000000004', '312000000002', '322000000001', '324000000006', '323000000003', '422000000004', '421000000004', '421000000003', '413000000001', '522000000000', '514000000004', '513000000000', '511000000000', '611000000001', '614000000001', '614000000003', '621000000002', '714000000004', '721000000002', '713000000001', '722000000000', '823000000004', '812000000005', '813000000007', '822000000002', '921000000001', '913000000006', '922000000005', '913000000008']
+
+other_title_image_ids = [
+    "other_title_image_ids",
+    "000000000007", #dog
+    "612000000003", #girl umbrella
+    "121000000001", #cattiger
+    "511000000002", #bear
+    ]
+figure_9_images = [
+    "figure_9_images",
+    "111000000001",
+    "112000000009",
+    "123000000005",
+    "124000000008"
 ]
 
-title_image_ids = ["000000000000", "211000000003", "511000000001"]
-plot_comparison(title_image_ids, experiment_names, save_name="title_images.png")
+figure_10_images = [
+    "figure_10_images",
+    "221000000002",
+    "222000000001",
+    "213000000005",
+    "214000000000",
+]
 
-random_image_ids = sample_images_by_editing_type("data/mapping_file.json", num_samples_per_type=1, editing_types=None)
-plot_comparison(random_image_ids, experiment_names, save_name="random_images.png")
+figure_11_images = [
+    "figure_11_images",
+    "311000000002",
+    "322000000000",
+    "313000000009",
+    "324000000005",
+]
 
+figure_12_images = [
+    "figure_12_images",
+    "411000000004",
+    "422000000000",
+    "414000000003",
+    "423000000000",
+]
+
+figure_13_images = [
+    "figure_13_images",
+    "511000000004",
+    "512000000001",
+    "523000000003",
+    "524000000002"
+]
+
+figure_14_images = [
+    "figure_14_images",
+    "621000000000",  # a small white blue lamb standing in the grass
+    "622000000001",  # a woman in a white red dress sitting on a chair with flowers
+    "623000000002",  # a red green lipstick is being splashed with red powder
+    "614000000001" 
+]
+
+figure_15_images = [
+    "figure_15_images",
+    "721000000000",  # a photo of a bronze horse in the field
+    "712000000001",  # a drawing of a young robot with blue eyes
+    "723000000003",  # a chocolate icecream cake with candies on top
+    "714000000003",  # the golden crescent moon and stars are seen in the night sky
+]
+
+figure_16_images = [
+    "figure_16_images",
+    "811000000009",
+    "812000000000",
+    "823000000006",
+    "823000000007"
+]
+
+figure_17_images = [
+    "figure_17_images",
+    "911000000001",
+    "922000000000",
+    "923000000002",
+    "924000000001"
+]
+
+my_sample_images = [
+    "121000000001",
+    "221000000002",
+    "311000000002",
+    "411000000004",
+    "511000000002",
+    "621000000002",
+    "712000000002",
+    "812000000000",
+    "920000000000",
+]
+
+
+##############################
+experiment_names = [
+    "origin_params_InfEdit",
+    "set_attn_base_store_like_in_app",
+    "set_title_MSAC",
+    "set_title_MSAC_mutula_is_mutual",
+]
+IMAGES = [
+    #random_image_ids,
+    other_title_image_ids,
+    figure_9_images,
+    figure_10_images,
+    figure_11_images,
+    figure_12_images,
+    figure_13_images,
+    figure_14_images,
+    figure_15_images,
+    figure_16_images,
+    figure_17_images,
+]
+
+#plot_comparison(random_image_ids, experiment_names, save_name=f"random.png")
+
+for i in IMAGES:
+    plot_comparison(
+        i[1:], 
+        experiment_names, 
+        save_name=f"{i[0]}.png",
+        exp_folder="experiments/imgs_results/pie_bench",
+        save_path="experiments/imgs_compare/see_diff_code_and_title"
+    )

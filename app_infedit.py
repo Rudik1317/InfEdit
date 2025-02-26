@@ -13,6 +13,9 @@ import numpy as np
 import seq_aligner
 import math
 
+import os
+os.environ['GRADIO_ANALYTICS_ENABLED'] = 'False'
+
 # remove warning depricated? maybe later rewrite code
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning, module="diffusers.configuration_utils")
@@ -263,7 +266,7 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
     def forward(self, attn, is_cross: bool, place_in_unet: str):
         if is_cross :
             h = attn.shape[0] // self.batch_size
-            attn = attn.reshape(self.batch_size,h,  *attn.shape[1:])
+            attn = attn.reshape(self.batch_size, h,  *attn.shape[1:])
             attn_base, attn_repalce,attn_masa = attn[0], attn[1], attn[2]
             attn_replace_new = self.replace_cross_attention(attn_masa, attn_repalce) 
             attn_base_store = self.replace_cross_attention(attn_base, attn_repalce)
@@ -378,7 +381,7 @@ def inference(img, source_prompt, target_prompt,
                    callback = controller.step_callback
                    )
 
-    return replace_nsfw_images(results)
+    return results.images[0]
 
 
 def replace_nsfw_images(results):

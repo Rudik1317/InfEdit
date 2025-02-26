@@ -373,9 +373,6 @@ def replace_nsfw_images(results):
     return results.images[0]
 
 
-
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--source_path', type=str, required=True)
@@ -388,20 +385,6 @@ def main():
     root = args.source_path
     target = args.target_path
     edit_category_list = args.edit_category_list
-
-    # model_params = {
-    #     structure = "ddcm+uac",
-    #     gdc_s=1, 
-    #     gdc_t=2.3, 
-    #     inf_stp=12,
-    #     cr_rpl_stp=0.7, 
-    #     slf_rpl_stp=0.7, 
-    #     eta=1,
-    #     thresh_e=0.55, 
-    #     thresh_m=0.6, 
-    #     denoise=False
-    # }
-    
 
     annotation_file_name = os.path.join(root,"mapping_file.json")
     with open (annotation_file_name) as f:
