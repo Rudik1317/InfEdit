@@ -238,8 +238,8 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                 k=torch.cat([k[:num_heads*2],k[:num_heads]])
                 v=torch.cat([v[:num_heads*2],v[:num_heads]])
             else:
-                q=torch.cat([q[:num_heads],q[:num_heads],q[:num_heads]])
-                k=torch.cat([k[:num_heads],k[:num_heads],k[:num_heads]])
+                q=torch.cat([q[:num_heads*2],q[:num_heads]])
+                k=torch.cat([k[:num_heads*2],k[:num_heads]])
                 v=torch.cat([v[:num_heads*2],v[:num_heads]])
             return q,k,v
         else:
@@ -254,10 +254,10 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                 vu=torch.cat([vu[:num_heads*2],vu[:num_heads]])
                 vc=torch.cat([vc[:num_heads*2],vc[:num_heads]])
             else:
-                qu=torch.cat([qu[:num_heads],qu[:num_heads],qu[:num_heads]])
-                qc=torch.cat([qc[:num_heads],qc[:num_heads],qc[:num_heads]])
-                ku=torch.cat([ku[:num_heads],ku[:num_heads],ku[:num_heads]])
-                kc=torch.cat([kc[:num_heads],kc[:num_heads],kc[:num_heads]])
+                qu=torch.cat([qu[:num_heads*2],qu[:num_heads]])
+                qc=torch.cat([qc[:num_heads*2],qc[:num_heads]])
+                ku=torch.cat([ku[:num_heads*2],ku[:num_heads]])
+                kc=torch.cat([kc[:num_heads*2],kc[:num_heads]])
                 vu=torch.cat([vu[:num_heads*2],vu[:num_heads]])
                 vc=torch.cat([vc[:num_heads*2],vc[:num_heads]])
 
@@ -271,7 +271,7 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
             attn_replace_new = self.replace_cross_attention(attn_masa, attn_repalce) 
             attn_base_store = self.replace_cross_attention(attn_base, attn_repalce)
             if (self.cross_replace_steps >= ((self.cur_step+self.start_steps+1)*1.0 / self.num_steps) ):
-                attn[1] = attn_base_store
+                attn[1] = attn_replace_new
             attn_store=torch.cat([attn_base_store,attn_replace_new])
             attn = attn.reshape(self.batch_size * h, *attn.shape[2:])
             attn_store = attn_store.reshape(2 *h, *attn_store.shape[2:])

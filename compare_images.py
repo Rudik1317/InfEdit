@@ -5,6 +5,45 @@ import cv2
 import numpy as np
 import random
 
+import math
+from PIL import Image
+
+
+def create_image_grid(folder_path, output_path):
+    # Получаем список изображений в папке
+    images = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.lower().endswith(('png', 'jpg', 'jpeg'))]
+    if not images:
+        print("Нет изображений в указанной папке.")
+        return
+    
+    # Открываем все изображения и получаем их размеры
+    opened_images = [Image.open(img) for img in images]
+    widths, heights = zip(*(img.size for img in opened_images))
+    
+    # Определяем количество колонок и строк
+    num_images = len(images)
+    cols = math.ceil(math.sqrt(num_images))
+    rows = math.ceil(num_images / cols)
+    
+    # Определяем размеры итогового изображения
+    max_width = max(widths)
+    max_height = max(heights)
+    total_width = cols * max_width
+    total_height = rows * max_height
+    
+    # Создаём пустое изображение
+    output_image = Image.new('RGB', (total_width, total_height), (255, 255, 255))
+    
+    # Располагаем изображения в сетке
+    for idx, img in enumerate(opened_images):
+        x_offset = (idx % cols) * max_width
+        y_offset = (idx // cols) * max_height
+        output_image.paste(img, (x_offset, y_offset))
+    
+    # Сохраняем итоговое изображение
+    output_image.save(output_path)
+    print(f"Готово! Изображение сохранено в {output_path}")
+
 def load_image(image_path):
     if not os.path.exists(image_path):
         return np.zeros((512, 512, 3), dtype=np.uint8)  # Заглушка, если файл отсутствует
@@ -91,6 +130,7 @@ def plot_comparison(image_ids, experiment_names, base_folder="data", exp_folder=
         image_path = image_data.get("image_path", "")
         original_prompt = image_data.get("original_prompt", "")
         editing_prompt = image_data.get("editing_prompt", "")
+        blended_word = image_data.get("blended_word", "")
         
         # Target изображение
         target_path = os.path.join(base_folder, "annotation_images", image_path)
@@ -109,7 +149,7 @@ def plot_comparison(image_ids, experiment_names, base_folder="data", exp_folder=
             axes[row_idx, col_idx + 1].axis("off")
         
         # Колонка с промптами в виде изображения
-        prompt_text = f"Orig: {original_prompt}\nEdit: {editing_prompt}\nImg_id: {image_id}"
+        prompt_text = f"Orig: {original_prompt}\nEdit: {editing_prompt}\nMutual Blend: {blended_word} \nImg_id: {image_id}"
         prompt_img = create_prompt_image(prompt_text)
         axes[row_idx, num_cols - 1].imshow(prompt_img)
         axes[row_idx, num_cols - 1].axis("off")
@@ -141,12 +181,6 @@ def sample_images_by_editing_type(mapping_file, num_samples_per_type, editing_ty
     return sampled_images
 
 
-
-#random_image_ids = sample_images_by_editing_type("data/mapping_file.json", num_samples_per_type=4, editing_types=None)
-#print(random_image_ids)
-#plot_comparison(title_image_ids, experiment_names, save_name="title_images.png")
-#['000000000010', '000000000104', '000000000007', '000000000034', '121000000002', '123000000008', '112000000005', '123000000004', '224000000003', '212000000003', '222000000007', '212000000002', '323000000006', '322000000005', '324000000007', '312000000000', '413000000003', '411000000000', '424000000002', '411000000004', '511000000003', '524000000004', '514000000003', '522000000003', '622000000004', '622000000000', '614000000000', '613000000004', '722000000003', '722000000001', '724000000004', '712000000000', '812000000000', '822000000006', '811000000000', '814000000009', '911000000002', '914000000000', '923000000005', '921000000009']
-#random_image_ids = ["random_images", '000000000101', '000000000054', '000000000020', '000000000009', '123000000007', '113000000007', '121000000000', '111000000000', '221000000001', '221000000007', '222000000002', '212000000004', '312000000002', '322000000001', '324000000006', '323000000003', '422000000004', '421000000004', '421000000003', '413000000001', '522000000000', '514000000004', '513000000000', '511000000000', '611000000001', '614000000001', '614000000003', '621000000002', '714000000004', '721000000002', '713000000001', '722000000000', '823000000004', '812000000005', '813000000007', '822000000002', '921000000001', '913000000006', '922000000005', '913000000008']
 
 other_title_image_ids = [
     "other_title_image_ids",
@@ -236,9 +270,22 @@ my_sample_images = [
     "621000000002",
     "712000000002",
     "812000000000",
-    "920000000000",
+    "922000000000",
+]
+my_sample_images2 =[
+        "213000000005",
+        "000000000009",
+        "712000000001",
+        "621000000001",
+        "422000000000",
+        "523000000001",
 ]
 
+##### рандомная сверка изображений
+def random_images_compare():
+    random_image_ids = sample_images_by_editing_type("data/mapping_file.json", num_samples_per_type=4, editing_types=None)
+    print(random_image_ids)
+    plot_comparison(random_image_ids, experiment_names, save_name=f"random.png")
 
 ##############################
 experiment_names = [
@@ -261,13 +308,58 @@ IMAGES = [
     figure_17_images,
 ]
 
-#plot_comparison(random_image_ids, experiment_names, save_name=f"random.png")
+def batch_images_compare(IMAGES, experiment_names):
+    for i in IMAGES:
+        plot_comparison(
+            i[1:], 
+            experiment_names, 
+            save_name=f"{i[0]}.png",
+            exp_folder="experiments/imgs_results/pie_bench",
+            save_path="experiments/imgs_compare/see_diff_code_and_title"
+        )
 
-for i in IMAGES:
-    plot_comparison(
-        i[1:], 
-        experiment_names, 
-        save_name=f"{i[0]}.png",
-        exp_folder="experiments/imgs_results/pie_bench",
-        save_path="experiments/imgs_compare/see_diff_code_and_title"
-    )
+def grid_images_compare():
+    grid_parameters = {
+        "guidance_s": [1.0, 1.1, 1.2, 1.3, 1.4, 1.6, 3],
+        "guidance_t": [1.7, 1.9, 2.1, 2.3, 2.5, 2.7, 3, 5],
+        "seed": [0, 17, 2342, 34534, 342534, 34985383, 89459499],
+        "cross_replace_steps": [0, 0.1, 0.3, 0.5, 0.7, 0.9 ,1],
+        "self_replace_steps": [0, 0.1, 0.3, 0.5, 0.7, 0.9 ,1],
+        "thresh_e": [0, 0.1, 0.25, 0.4, 0.55, 0.7, 0.85, 0.9, 1],
+        "thresh_m": [0, 0.1, 0.25, 0.4, 0.55, 0.7, 0.85, 0.9, 1],
+        "strength": [0.75, 0.85, 0.88, 0.9, 0.93, 0.96, 0.98, 1, 0],
+        "eta": [0.3, 0.5, 0.75, 1, 1.2, 1.5],
+    }
+
+    for param in grid_parameters:
+        plot_comparison(
+            my_sample_images, 
+            experiment_names=[f"{i}_{param}" for i in grid_parameters[param]], 
+            save_name=f"{param}.png",
+            exp_folder=f"experiments/imgs_results/{param}",
+            save_path="experiments/imgs_compare/try_2702"
+        )
+
+def tmp():
+    image_ids = [
+        ["000000000007", "000000000009", "111000000001", "112000000009", "121000000001"],
+        ["123000000005", "124000000008", "213000000005", "214000000000", "221000000002"],
+        ["222000000001", "311000000002", "313000000009", "322000000000", "324000000005"],
+        ["411000000004", "414000000003", "422000000000", "423000000000", "511000000002"],
+        ["511000000004", "512000000001", "523000000001", "523000000003", "524000000002"],
+        ["612000000003", "614000000001", "621000000000", "621000000001", "621000000002"],
+        ["622000000001", "623000000002", "712000000001", "712000000002", "721000000000"],
+        ["723000000003", "714000000003", "811000000009", "812000000000", "823000000006"],
+        ["823000000007", "911000000001", "922000000000", "923000000002", "924000000001"]
+    ]
+    for idx, i in enumerate(image_ids):
+        plot_comparison(
+            i, 
+            experiment_names=["origin_params_InfEdit", "cross_src_scac"], 
+            save_name=f"{idx}.png",
+            exp_folder="experiments/imgs_results",
+            save_path="experiments/imgs_compare/cross_src_scac"
+        )
+            
+    # Пример использования
+    create_image_grid("experiments/imgs_compare/cross_src_scac", "experiments/imgs_compare/cross_src_scac_sum.jpg")

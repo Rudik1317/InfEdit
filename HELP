@@ -1,0 +1,13 @@
+conda activate rudenkovInfEdit
+conda create --prefix /home/mdnikolaev/.conda/envs/rudenkovInfEdit_o python=3.9
+
+### Как запустить инференс пайбенча и потом посчитать на нем метрики
+python run_pie_bench.py --source_path data  --target experiments/results/pie_bench/origin_params
+
+PYTHONPATH=. python evaluation/evaluate.py --metrics "structure_distance" "psnr_unedit_part" "lpips_unedit_part" "mse_unedit_part" "ssim_unedit_part" "clip_similarity_source_image" "clip_similarity_target_image" "clip_similarity_target_image_edit_part" --result_path evaluation_result.csv --edit_category_list 0 1 2 3 4 5 6 7 8 9 --tgt_methods piy_bench_2411280347 --device gpu
+
+PYTHONPATH=. python evaluation/evaluate.py --metrics "structure_distance" "psnr_unedit_part" "lpips_unedit_part" "mse_unedit_part" "ssim_unedit_part" "clip_similarity_source_image" "clip_similarity_target_image" "clip_similarity_target_image_edit_part" --result_path eval_res_origin_and_not_edit.csv --edit_category_list 0 1 2 3 4 5 6 7 8 9 --tgt_methods "infEdit_origin" "no_edit" --device gpu
+
+
+python run_pie_bench.py --source_path data  --target experiments/results/pie_bench/origin_params_InfEdit
+PYTHONPATH=. python evaluation/evaluate.py --metrics "structure_distance" "psnr_unedit_part" "lpips_unedit_part" "mse_unedit_part" "ssim_unedit_part" "clip_similarity_source_image" "clip_similarity_target_image" "clip_similarity_target_image_edit_part" --result_path origin_1.csv --edit_category_list 0 1 2 3 4 5 6 7 8 9 --tgt_methods "origin_params_InfEdit" "origin_params_InfEdit_2" --device gpu
